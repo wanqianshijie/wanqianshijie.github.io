@@ -12,4 +12,5 @@
   text-align: center;
   font-size: 14px;
   margin-top: 5px;
+  white-space: pre-line; /* 允许换行显示 */
 }
