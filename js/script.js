@@ -1,93 +1,104 @@
 $(document).ready(function() {
   var page = 1;
   var perPage = 4;
-  var photoContainer = $('#photoContainer');
+  var gallery = $('#gallery');
 
   loadPhotos();
 
   $(window).scroll(function() {
     if($(window).scrollTop() + $(window).height() == $(document).height()) {
-      page++;
       loadPhotos();
     }
   });
 
   function loadPhotos() {
-    var apiUrl = 'https://api.github.com/repos/wanqianshijie/photos/contents/img?ref=main';
+    var apiUrl = 'https://api.github.com/repos/{username}/{repository}/contents/{path}';
+    var username = 'wanqianshijie';
+    var repository = 'photos';
+    var path = 'img';
 
     $.ajax({
-      url: apiUrl,
-      method: 'GET',
-      data: { page: page, per_page: perPage },
-      headers: { 'Authorization': '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' },
-      success: function(response) {
-        for(var i = 0; i < response.length; i++) {
-          var photoData = response[i];
-          var photoUrl = photoData.download_url;
+      url: apiUrl.replace('{username}', username).replace('{repository}', repository).replace('{path}', path),
+      dataType: 'json',
+      success: function(data) {
+        var start = (page - 1) * perPage;
+        var end = start + perPage;
 
-          getPhotoMetadata(photoUrl, function(metadata) {
-            var photoElement = createPhotoElement(photoUrl, metadata);
-            photoContainer.append(photoElement);
-          });
+        for (var i = start; i < end; i++) {
+          if (i >= data.length) {
+            break;
+          }
+
+          var photo = data[i];
+          var photoUrl = photo.download_url;
+          var photoInfo = getPhotoInfo(photoUrl);
+
+          var photoElement = $('<div class="photo">');
+          var imgElement = $('<img>').attr('src', photoUrl);
+          var infoElement = $('<div class="photo-info">').html(photoInfo);
+
+          photoElement.append(imgElement);
+          photoElement.append(infoElement);
+          gallery.append(photoElement);
         }
+
+        page++;
       }
     });
   }
 
-  function getPhotoMetadata(photoUrl, callback) {
+  function getPhotoInfo(photoUrl) {
+    var photoInfo = '';
+
     EXIF.getData(photoUrl, function() {
-      var metadata = {};
-
       var exifData = EXIF.getAllTags(this);
-      metadata.timestamp = exifData.DateTimeOriginal;
-      metadata.latitude = formatCoordinates(exifData.GPSLatitude, exifData.GPSLatitudeRef);
-      metadata.longitude = formatCoordinates(exifData.GPSLongitude, exifData.GPSLongitudeRef);
-      metadata.exposureTime = exifData.ExposureTime;
-      metadata.aperture = exifData.FNumber;
-      metadata.iso = exifData.ISOSpeedRatings;
-      metadata.device = exifData.Model;
 
-      callback(metadata);
+      var date = exifData.DateTimeOriginal;
+      var latitude = exifData.GPSLatitude;
+      var longitude = exifData.GPSLongitude;
+      var exposureTime = exifData.ExposureTime;
+      var aperture = exifData.FNumber;
+      var iso = exifData.ISOSpeedRatings;
+      var make = exifData.Make;
+      var model = exifData.Model;
+
+      // Format the date
+      var formattedDate = formatDate(date);
+
+      // Convert latitude and longitude to readable format
+      var formattedLatitude = convertCoordinate(latitude);
+      var formattedLongitude = convertCoordinate(longitude);
+
+      photoInfo = 'Date: ' + formattedDate + '<br>';
+      photoInfo += 'Latitude: ' + formattedLatitude + '<br>';
+      photoInfo += 'Longitude: ' + formattedLongitude + '<br>';
+      photoInfo += 'Exposure Time: ' + exposureTime + '<br>';
+      photoInfo += 'Aperture: ' + aperture + '<br>';
+      photoInfo += 'ISO: ' + iso + '<br>';
+      photoInfo += 'Device: ' + make + ' ' + model;
     });
+
+    return photoInfo;
   }
 
-  function createPhotoElement(photoUrl, metadata) {
-    var photoElement = $('<div>').addClass('photo');
-    var photoImage = $('<img>').attr('src', photoUrl);
-    var photoInfo = $('<div>').addClass('photoInfo').html(
-      '<strong>Date:</strong> ' + formatDate(metadata.timestamp) + '<br>' +
-      '<strong>Latitude:</strong> ' + metadata.latitude + '<br>' +
-      '<strong>Longitude:</strong> ' + metadata.longitude + '<br>' +
-      '<strong>Exposure Time:</strong> ' + metadata.exposureTime + '<br>' +
-      '<strong>Aperture:</strong> ' + metadata.aperture + '<br>' +
-      '<strong>ISO:</strong> ' + metadata.iso + '<br>' +
-      '<strong>Device:</strong> ' + metadata.device
-    );
-
-    photoElement.append(photoImage);
-    photoElement.append(photoInfo);
-
-    return photoElement;
+  function formatDate(date) {
+    var parts = date.split(' ');
+    var datePart = parts[0].split(':').reverse().join('-');
+    var timePart = parts[1];
+    return datePart + ' ' + timePart;
   }
 
-  function formatCoordinates(coordinates, direction) {
-    var degrees = coordinates[0];
-    var minutes = coordinates[1];
-    var seconds = coordinates[2];
+  function convertCoordinate(coord) {
+    var degrees = coord[0];
+    var minutes = coord[1];
+    var seconds = coord[2];
+    var direction = coord[3];
 
-    var decimalDegrees = degrees + (minutes / 60) + (seconds / 3600);
-    decimalDegrees = direction === 'S' || direction === 'W' ? -decimalDegrees : decimalDegrees;
+    var decimal = degrees + (minutes / 60) + (seconds / 3600);
+    if (direction === 'S' || direction === 'W') {
+      decimal = -decimal;
+    }
 
-    return decimalDegrees.toFixed(6);
-  }
-
-  function formatDate(timestamp) {
-    var date = new Date(timestamp);
-    var year = date.getFullYear();
-    var month = ('0' + (date.getMonth() + 1)).slice(-2);
-    var day = ('0' + date.getDate()).slice(-2);
-    var formattedDate = year + '-' + month + '-' + day;
-
-    return formattedDate;
+    return decimal.toFixed(6);
   }
 });
