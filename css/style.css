@@ -1,23 +1,37 @@
-#gallery {
-  display: flex;
-  flex-wrap: wrap;
+body {
+    margin: 0;
+    padding: 0;
+}
+
+.gallery {
+    padding: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
 .photo-container {
-  flex-basis: 25%;
-  padding: 10px;
-  box-sizing: border-box;
+    width: 25%;
+    padding: 10px;
+    box-sizing: border-box;
 }
 
-.photo-info {
-  margin-top: 10px;
-  font-size: 14px;
+.photo {
+    width: 100%;
+    height: auto;
+    display: block;
 }
 
-.photo-info p {
-  margin: 0;
+.exif-info {
+    background-color: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    padding: 10px;
+    font-family: Arial, sans-serif;
+    font-size: 12px;
 }
 
-strong {
-  font-weight: bold;
+.exif-info p {
+    margin: 5px 0;
 }
+
+/* Add more CSS styles to enhance the page appearance */
