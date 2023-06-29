@@ -8,8 +8,7 @@ new Vue({
   },
   methods: {
     fetchPhotos() {
-      const apiUrl = 'https://api.github.com/repos/wanqianshijie/photos/contents/img';
-      // 使用实际的GitHub用户名和存储照片的仓库替换上述的"username/repo"
+      const apiUrl = 'https://api.github.com/repos/lairdmax/zhaopian/contents/zhanshi/images';
       fetch(apiUrl)
         .then(response => response.json())
         .then(data => {
@@ -30,7 +29,7 @@ new Vue({
     },
     fetchExif(photo) {
       const imageUrl = photo.url;
-      EXIF.getData(imageUrl, function() {
+      EXIF.getData(this, function() {
         const exifData = EXIF.getAllTags(this);
         photo.exif = {
           shootTime: exifData.DateTimeOriginal,
