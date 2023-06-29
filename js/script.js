@@ -1,124 +1,85 @@
-// 获取照片信息并展示
-function loadPhotos() {
-  const gallery = document.getElementById('gallery');
-  const apiUrl = 'https://api.github.com/repos/wanqianshijie/photos/contents/img';
+$(document).ready(function() {
+    var page = 1; // 当前页码
+    var perPage = 4; // 每页照片数量
+    var baseUrl = 'https://api.github.com/repos/wanqianshijie/photos/contents/img'; // GitHub API URL
+    var gallery = $('#gallery'); // 照片展示容器
 
-  // 使用GitHub API获取照片列表
-  fetch(apiUrl)
-    .then(response => response.json())
-    .then(data => {
-      const photoUrls = data.map(photo => photo.download_url);
-      const photosCount = photoUrls.length;
+    loadPhotos();
 
-      // 随机获取4张照片
-      const randomPhotos = getRandomPhotos(photoUrls, 4);
-
-      randomPhotos.forEach(photoUrl => {
-        // 创建照片容器
-        const photoContainer = document.createElement('div');
-        photoContainer.classList.add('photo-container');
-
-        // 创建照片元素
-        const photo = document.createElement('img');
-        photo.src = photoUrl;
-        photo.classList.add('photo');
-        photoContainer.appendChild(photo);
-
-        // 获取照片的EXIF信息
-        getExifData(photo)
-          .then(exifData => {
-            // 创建显示EXIF信息的元素
-            const exifInfo = document.createElement('div');
-            exifInfo.classList.add('exif-info');
-
-            // 解析EXIF信息并添加到页面
-            const parsedExif = parseExifData(exifData);
-            exifInfo.innerHTML = `
-              <p><strong>Date:</strong> ${parsedExif.date}</p>
-              <p><strong>Location:</strong> ${parsedExif.location}</p>
-              <p><strong>Exposure Time:</strong> ${parsedExif.exposureTime}</p>
-              <p><strong>Aperture:</strong> ${parsedExif.aperture}</p>
-              <p><strong>ISO:</strong> ${parsedExif.iso}</p>
-              <p><strong>Device:</strong> ${parsedExif.device}</p>
-            `;
-
-            photoContainer.appendChild(exifInfo);
-          });
-
-        gallery.appendChild(photoContainer);
-      });
+    // 滚动到底部时加载更多照片
+    $(window).scroll(function() {
+        if ($(window).scrollTop() + $(window).height() == $(document).height()) {
+            page++;
+            loadPhotos();
+        }
     });
-}
 
-// 获取随机照片
-function getRandomPhotos(photos, count) {
-  const randomPhotos = [];
-  const shuffledPhotos = photos.sort(() => 0.5 - Math.random());
+    // 加载照片
+    function loadPhotos() {
+        var url = baseUrl + '?page=' + page + '&per_page=' + perPage;
+        $.getJSON(url, function(data) {
+            $.each(data, function(index, photo) {
+                var img = $('<img>').attr('src', photo.download_url).addClass('photo');
+                var info = $('<div>').addClass('info');
 
-  for (let i = 0; i < count; i++) {
-    randomPhotos.push(shuffledPhotos[i]);
-  }
+                // 获取照片的EXIF信息
+                getExifInfo(photo.download_url, function(exif) {
+                    var time = formatDate(exif.DateTimeOriginal);
+                    var latitude = formatCoordinate(exif.GPSLatitude, exif.GPSLatitudeRef);
+                    var longitude = formatCoordinate(exif.GPSLongitude, exif.GPSLongitudeRef);
+                    var exposureTime = exif.ExposureTime;
+                    var aperture = exif.FNumber;
+                    var iso = exif.ISOSpeedRatings;
+                    var make = exif.Make;
+                    var model = exif.Model;
 
-  return randomPhotos;
-}
+                    // 创建照片信息的HTML元素
+                    var infoHtml = '<p>拍摄时间：' + time + '</p>' +
+                                   '<p>经度坐标：' + longitude + '</p>' +
+                                   '<p>纬度坐标：' + latitude + '</p>' +
+                                   '<p>曝光时间：' + exposureTime + '</p>' +
+                                   '<p>光圈大小：' + aperture + '</p>' +
+                                   '<p>ISO：' + iso + '</p>' +
+                                   '<p>设备信息：' + make + ' ' + model + '</p>';
 
-// 使用exif.js获取照片的EXIF信息
-function getExifData(photo) {
-  return new Promise((resolve, reject) => {
-    EXIF.getData(photo, function() {
-      const exifData = EXIF.pretty(this);
-      resolve(exifData);
-    });
-  });
-}
+                    info.html(infoHtml);
 
-// 解析EXIF信息
-function parseExifData(exifData) {
-  const exif = {};
+                    // 将照片和信息添加到照片展示容器中
+                    gallery.append(img);
+                    gallery.append(info);
+                });
+            });
+        });
+    }
 
-  exifData.split('\n').forEach(item => {
-    const keyValue = item.split(':');
-    const key = keyValue[0].trim();
-    const value = keyValue[1].trim();
-    exif[key] = value;
-  });
+    // 获取照片的EXIF信息
+    function getExifInfo(url, callback) {
+        EXIF.getData(url, function() {
+            var exif = EXIF.getAllTags(this);
+            callback(exif);
+        });
+    }
 
-  // 优化经度和纬度坐标
-  if (exif.GPSLatitude && exif.GPSLongitude) {
-    const latitude = convertCoordinates(exif.GPSLatitude, exif.GPSLatitudeRef);
-    const longitude = convertCoordinates(exif.GPSLongitude, exif.GPSLongitudeRef);
-    exif.location = `Latitude: ${latitude}, Longitude: ${longitude}`;
-  }
+    // 格式化经度/纬度坐标
+    function formatCoordinate(coordinate, direction) {
+        var degrees = coordinate[0];
+        var minutes = coordinate[1];
+        var seconds = coordinate[2];
 
-  // 优化日期格式
-  if (exif.DateTimeOriginal) {
-    const date = formatDate(exif.DateTimeOriginal);
-    exif.date = date;
-  }
+        var formatted = degrees + '° ' + minutes + '\' ' + seconds + '\" ' + direction;
 
-  return exif;
-}
+        return formatted;
+    }
 
-// 转换经度和纬度坐标
-function convertCoordinates(coordinates, direction) {
-  const degrees = coordinates[0];
-  const minutes = coordinates[1];
-  const seconds = coordinates[2];
-  let decimal = degrees + minutes / 60 + seconds / 3600;
+    // 格式化日期
+    function formatDate(dateString) {
+        var date = new Date(dateString);
+        var formatted = date.getFullYear() + '-' + padZero(date.getMonth() + 1) + '-' + padZero(date.getDate());
+        return formatted;
+    }
 
-  if (direction === 'S' || direction === 'W') {
-    decimal = -decimal;
-  }
-
-  return decimal.toFixed(6);
-}
-
-// 格式化日期
-function formatDate(dateString) {
-  const date = new Date(dateString);
-  const options = { year: 'numeric', month: 'long', day: 'numeric' };
-  return date.toLocaleDateString('en-US', options);
-}
-
-// 页面加载时加载照片
-window.addEventListener('DOMContentLoaded', loadPhotos);
+    // 补零函数
+    function padZero(num) {
+        return num < 10 ? '0' + num : num;
+    }
+});
