@@ -31,7 +31,7 @@ $(document).ready(function() {
           var exifElement = $('<div class="exif"></div>');
 
           // Extract and format the required EXIF information
-          var dateTimeOriginal = exifData.DateTime;
+          var dateTime = exifData.DateTimeOriginal || exifData.DateTimeDigitized || exifData.DateTime;
           var exposureTime = exifData.ExposureTime;
           var apertureValue = exifData.ApertureValue;
           var isoSpeedRatings = exifData.ISOSpeedRatings;
@@ -40,11 +40,11 @@ $(document).ready(function() {
           var make = exifData.Make;
           var model = exifData.Model;
 
-          var formattedDateTime = formatDateTime(dateTimeOriginal);
+          var formattedDateTime = formatDateTime(dateTime);
           var formattedExposureTime = formatExposureTime(exposureTime);
           
           // Create HTML content for the exif element
-          var exifContent = '<p>拍摄时间：' + dateTimeOriginal + '</p>' +
+          var exifContent = '<p>拍摄时间：' + dateTime + '</p>' +
                             '<p>经度坐标：' + formatCoordinate(gpsLongitude) + '</p>' +
                             '<p>纬度坐标：' + formatCoordinate(gpsLatitude) + '</p>' +
                             '<p>曝光时间：' + formattedExposureTime + ' 秒</p>' +
