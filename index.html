@@ -1,12 +1,18 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Photo Gallery</title>
-    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-    <div class="gallery"></div>
-    <script src="js/script.js"></script>
-    <script src="exif.js"></script>
+    <div class="gallery">
+        <div id="photoContainer"></div>
+        <button id="loadMoreButton">Load More</button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/exif-js/2.3.0/exif.min.js"></script>
+    <script src="js/scripts.js"></script>
 </body>
 </html>
