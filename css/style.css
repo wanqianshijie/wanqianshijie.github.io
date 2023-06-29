@@ -1,0 +1,26 @@
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+h1 {
+  margin-bottom: 30px;
+}
+
+.photo {
+  display: inline-block;
+  margin: 10px;
+  text-align: center;
+}
+
+.photo img {
+  max-width: 100%;
+  height: auto;
+}
+
+.photo .exif {
+  margin-top: 10px;
+  font-size: 14px;
+}
+
