@@ -41,7 +41,7 @@ $(document).ready(function() {
           var model = exifData.Model;
 
           var formattedDateTime = formatDateTime(dateTimeOriginal);
-          var formattedExposureTime = formatFraction(exposureTime);
+          var formattedExposureTime = formatExposureTime(exposureTime);
           
           // Create HTML content for the exif element
           var exifContent = '<p>拍摄时间：' + formattedDateTime + '</p>' +
@@ -75,12 +75,10 @@ $(document).ready(function() {
     return year + '-' + month + '-' + day + ' ' + hours + ':' + minutes + ':' + seconds;
   }
 
-  // Format the fraction
-  function formatFraction(fraction) {
-    var numerator = fraction.numerator;
-    var denominator = Math.round(fraction.denominator);
-
-    return numerator + '/' + denominator;
+  // Format the exposure time
+  function formatExposureTime(fraction) {
+    var denominator = Math.round(fraction);
+    return '1/' + denominator;
   }
 
   // Format the coordinate
