@@ -31,7 +31,7 @@ function displayPhoto(photoUrl) {
     // 创建照片描述
     var descriptionElement = document.createElement('div');
     descriptionElement.classList.add('photo-description');
-    descriptionElement.innerText = exifInfo;
+    descriptionElement.innerHTML = exifInfo;
 
     // 将照片和描述添加到页面中
     photoContainer.appendChild(photoElement);
@@ -64,13 +64,13 @@ function getFormattedExifInfo(exifData) {
   exposureTime = formatExposureTime(exposureTime);
 
   // 构建EXIF信息字符串
-  var exifInfo = "拍摄时间：" + dateTimeOriginal + "\n";
-  exifInfo += "经度坐标：" + longitude + "\n";
-  exifInfo += "纬度坐标：" + latitude + "\n";
-  exifInfo += "曝光时间：" + exposureTime + " 秒\n";
-  exifInfo += "光圈大小：" + apertureValue + "\n";
-  exifInfo += "ISO：" + isoSpeedRatings + "\n";
-  exifInfo += "设备信息：" + make + " " + model;
+  var exifInfo = "<b>拍摄时间：</b>" + dateTimeOriginal + "<br>";
+  exifInfo += "<b>经度坐标：</b>" + longitude + "<br>";
+  exifInfo += "<b>纬度坐标：</b>" + latitude + "<br>";
+  exifInfo += "<b>曝光时间：</b>" + exposureTime + " 秒<br>";
+  exifInfo += "<b>光圈大小：</b>" + apertureValue + "<br>";
+  exifInfo += "<b>ISO：</b>" + isoSpeedRatings + "<br>";
+  exifInfo += "<b>设备信息：</b>" + make + " " + model;
 
   return exifInfo;
 }
@@ -88,7 +88,7 @@ function optimizeCoordinate(coordinate, coordinateRef) {
 
 function formatDateTimeOriginal(dateTimeOriginal) {
   // 将拍摄日期格式化为"YYYY-MM-DD HH:MM:SS"的形式
-  var date = new Date(dateTimeOriginal * 1000);
+  var date = new Date(dateTimeOriginal.getTime());
   var formattedDate = date.getFullYear() + '-' + (date.getMonth() + 1).toString().padStart(2, '0') + '-' + date.getDate().toString().padStart(2, '0');
   var formattedTime = date.getHours().toString().padStart(2, '0') + ':' + date.getMinutes().toString().padStart(2, '0') + ':' + date.getSeconds().toString().padStart(2, '0');
   
