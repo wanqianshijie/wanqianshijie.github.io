@@ -28,15 +28,15 @@ function showPhotos() {
 }
 
 function createPhotoElement(photo) {
-  const div = document.createElement('div');
-  div.className = 'photo';
+  const container = document.createElement('div');
+  container.className = 'photo-container';
 
   const img = document.createElement('img');
   img.src = photo.download_url;
-  div.appendChild(img);
+  container.appendChild(img);
 
-  const info = document.createElement('div');
-  info.className = 'info';
+  const exifInfo = document.createElement('div');
+  exifInfo.className = 'exif-info';
 
   const exifData = getExifData(photo.exif);
   const { dateTime, latitude, longitude, exposureTime, aperture, iso, make, model } = exifData;
@@ -45,19 +45,25 @@ function createPhotoElement(photo) {
   const formattedLatitude = formatCoordinate(latitude);
   const formattedLongitude = formatCoordinate(longitude);
 
-  info.innerHTML = `
-    <p>Date: ${formattedDateTime}</p>
-    <p>Latitude: ${formattedLatitude}</p>
-    <p>Longitude: ${formattedLongitude}</p>
-    <p>Exposure Time: ${exposureTime}</p>
-    <p>Aperture: ${aperture}</p>
-    <p>ISO: ${iso}</p>
-    <p>Device: ${make} ${model}</p>
+  exifInfo.innerHTML = `
+    <div class="exif-info-row">
+      <div class="exif-info-item">Date: ${formattedDateTime}</div>
+      <div class="exif-info-item">Latitude: ${formattedLatitude}</div>
+      <div class="exif-info-item">Longitude: ${formattedLongitude}</div>
+    </div>
+    <div class="exif-info-row">
+      <div class="exif-info-item">Exposure Time: ${exposureTime}</div>
+      <div class="exif-info-item">Aperture: ${aperture}</div>
+      <div class="exif-info-item">ISO: ${iso}</div>
+    </div>
+    <div class="exif-info-row">
+      <div class="exif-info-item">Device: ${make} ${model}</div>
+    </div>
   `;
 
-  div.appendChild(info);
+  container.appendChild(exifInfo);
 
-  return div;
+  return container;
 }
 
 function getExifData(exif) {
@@ -70,9 +76,8 @@ function getExifData(exif) {
 
 function formatDateTime(dateTime) {
   const date = new Date(dateTime);
-  const formattedDate = date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-  const formattedTime = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
-  return `${formattedDate}, ${formattedTime}`;
+  const options = { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true };
+  return new Intl.DateTimeFormat('en-US', options).format(date);
 }
 
 function formatCoordinate(coordinate) {
@@ -89,4 +94,4 @@ window.addEventListener('scroll', () => {
   }
 });
 
-loadPhotos();
+window.onload = loadPhotos;
