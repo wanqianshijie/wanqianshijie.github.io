@@ -1,97 +1,105 @@
-const gallery = document.getElementById('gallery');
-let photos = [];
-let currentBatch = 0;
-const batchSize = 4;
+window.addEventListener('DOMContentLoaded', function () {
+    const photoContainer = document.getElementById('photoContainer');
+    let photos = [];
+    let currentIndex = 0;
+    const photosPerLoad = 4;
 
-function loadPhotos() {
-  const xhr = new XMLHttpRequest();
-  xhr.open('GET', 'https://api.github.com/repos/wanqianshijie/photos/contents/img', true);
-  xhr.onload = function() {
-    if (xhr.status === 200) {
-      const response = JSON.parse(xhr.responseText);
-      photos = response;
-      showPhotos();
+    // 获取照片信息
+    function getPhotos() {
+        const apiUrl = 'https://api.github.com/repos/wanqianshijie/photos/contents/img';
+
+        fetch(apiUrl)
+            .then(response => response.json())
+            .then(data => {
+                photos = data;
+                displayPhotos();
+            })
+            .catch(error => console.log(error));
     }
-  }
-  xhr.send();
-}
 
-function showPhotos() {
-  const start = currentBatch * batchSize;
-  const end = start + batchSize;
-  const batch = photos.slice(start, end);
-  batch.forEach(photo => {
-    const photoElement = createPhotoElement(photo);
-    gallery.appendChild(photoElement);
-  });
-  currentBatch++;
-}
+    // 显示照片
+    function displayPhotos() {
+        const endIndex = currentIndex + photosPerLoad;
+        const photosToShow = photos.slice(currentIndex, endIndex);
 
-function createPhotoElement(photo) {
-  const container = document.createElement('div');
-  container.className = 'photo-container';
+        photosToShow.forEach(photo => {
+            const photoCard = createPhotoCard(photo);
+            photoContainer.appendChild(photoCard);
+        });
 
-  const img = document.createElement('img');
-  img.src = photo.download_url;
-  container.appendChild(img);
+        currentIndex += photosPerLoad;
 
-  const exifInfo = document.createElement('div');
-  exifInfo.className = 'exif-info';
+        if (currentIndex < photos.length) {
+            showLoadMoreButton();
+        }
+    }
 
-  const exifData = getExifData(photo.exif);
-  const { dateTime, latitude, longitude, exposureTime, aperture, iso, make, model } = exifData;
+    // 创建照片卡片
+    function createPhotoCard(photo) {
+        const photoCard = document.createElement('div');
+        photoCard.className = 'photoCard';
 
-  const formattedDateTime = formatDateTime(dateTime);
-  const formattedLatitude = formatCoordinate(latitude);
-  const formattedLongitude = formatCoordinate(longitude);
+        const img = document.createElement('img');
+        img.src = photo.download_url;
+        photoCard.appendChild(img);
 
-  exifInfo.innerHTML = `
-    <div class="exif-info-row">
-      <div class="exif-info-item">Date: ${formattedDateTime}</div>
-      <div class="exif-info-item">Latitude: ${formattedLatitude}</div>
-      <div class="exif-info-item">Longitude: ${formattedLongitude}</div>
-    </div>
-    <div class="exif-info-row">
-      <div class="exif-info-item">Exposure Time: ${exposureTime}</div>
-      <div class="exif-info-item">Aperture: ${aperture}</div>
-      <div class="exif-info-item">ISO: ${iso}</div>
-    </div>
-    <div class="exif-info-row">
-      <div class="exif-info-item">Device: ${make} ${model}</div>
-    </div>
-  `;
+        const photoInfo = document.createElement('div');
+        photoInfo.className = 'photoInfo';
 
-  container.appendChild(exifInfo);
+        const exifData = getExifData(photo.exif_url);
+        photoInfo.innerHTML = `
+            <p><span>拍摄时间：</span>${formatDate(exifData.DateTimeOriginal)}</p>
+            <p><span>经度坐标：</span>${optimizeCoordinate(exifData.GPSLongitude)}</p>
+            <p><span>纬度坐标：</span>${optimizeCoordinate(exifData.GPSLatitude)}</p>
+            <p><span>曝光时间：</span>${exifData.ExposureTime}</p>
+            <p><span>光圈大小：</span>${exifData.FNumber}</p>
+            <p><span>ISO：</span>${exifData.ISO}</p>
+            <p><span>设备信息：</span>${exifData.Make} ${exifData.Model}</p>
+        `;
 
-  return container;
-}
+        photoCard.appendChild(photoInfo);
 
-function getExifData(exif) {
-  const exifData = {};
-  exif.forEach(data => {
-    exifData[data.tag] = data.value;
-  });
-  return exifData;
-}
+        return photoCard;
+    }
 
-function formatDateTime(dateTime) {
-  const date = new Date(dateTime);
-  const options = { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true };
-  return new Intl.DateTimeFormat('en-US', options).format(date);
-}
+    // 获取照片的EXIF数据
+    function getExifData(exifUrl) {
+        const exifData = EXIF.getData(exifUrl);
+        return exifData;
+    }
 
-function formatCoordinate(coordinate) {
-  const degrees = Math.floor(coordinate);
-  const minutes = Math.floor((coordinate - degrees) * 60);
-  const seconds = Math.round((coordinate - degrees - minutes / 60) * 3600);
-  return `${degrees}° ${minutes}' ${seconds}"`;
-}
+    // 优化坐标显示
+    function optimizeCoordinate(coordinate) {
+        const degrees = coordinate[0];
+        const minutes = coordinate[1];
+        const seconds = coordinate[2];
 
-window.addEventListener('scroll', () => {
-  const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
-  if (scrollTop + clientHeight >= scrollHeight) {
-    showPhotos();
-  }
+        const optimizedCoordinate = degrees + '°' + minutes + "'" + seconds + '"';
+        return optimizedCoordinate;
+    }
+
+    // 格式化日期
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        const formattedDate = date.toLocaleDateString('en-US', options);
+        return formattedDate;
+    }
+
+    // 显示加载更多按钮
+    function showLoadMoreButton() {
+        const loadMoreBtn = document.createElement('div');
+        loadMoreBtn.className = 'loadMoreBtn';
+        loadMoreBtn.innerHTML = '<button onclick="loadMorePhotos()">加载更多</button>';
+        photoContainer.appendChild(loadMoreBtn);
+    }
+
+    // 加载更多照片
+    function loadMorePhotos() {
+        const loadMoreBtn = document.querySelector('.loadMoreBtn');
+        photoContainer.removeChild(loadMoreBtn);
+        displayPhotos();
+    }
+
+    getPhotos();
 });
-
-window.onload = loadPhotos;
