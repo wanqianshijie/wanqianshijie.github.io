@@ -29,14 +29,18 @@ new Vue({
     },
     fetchExif(photo) {
       const imageUrl = photo.url;
-      EXIF.getData(this, function() {
-        const exifData = EXIF.getAllTags(this);
-        photo.exif = {
-          shootTime: exifData.DateTimeOriginal,
-          device: exifData.Model,
-          parameters: `Aperture: f/${exifData.FNumber}, Shutter Speed: ${exifData.ExposureTime}s, ISO: ${exifData.ISO}`
-        };
-      });
+      const img = new Image();
+      img.src = imageUrl;
+      img.onload = () => {
+        EXIF.getData(img, function() {
+          const exifData = EXIF.getAllTags(this);
+          photo.exif = {
+            shootTime: exifData.DateTimeOriginal,
+            device: exifData.Model,
+            parameters: `Aperture: f/${exifData.FNumber}, Shutter Speed: ${exifData.ExposureTime}s, ISO: ${exifData.ISO}`
+          };
+        });
+      };
     }
   }
 });
