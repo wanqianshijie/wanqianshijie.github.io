@@ -8,7 +8,7 @@ new Vue({
   },
   methods: {
     fetchPhotos() {
-      const apiUrl = 'https://api.github.com/repos/lairdmax/zhaopian/contents/zhanshi/images';
+      const apiUrl = 'https://api.github.com/repos/wanqianshijie/photos/contents/img';
       fetch(apiUrl)
         .then(response => response.json())
         .then(data => {
