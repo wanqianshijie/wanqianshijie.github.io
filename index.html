@@ -1,13 +1,22 @@
 <!DOCTYPE html>
-<html>
-<head>
-    <title>照片展示</title>
-    <link rel="stylesheet" type="text/css" href="css/style.css">
-</head>
-<body>
-    <div id="photoContainer"></div>
+<html lang="en">
 
-    <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
-    <script src="js/script.js"></script>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Photo Gallery</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+  <div class="container">
+    <h1>Photo Gallery</h1>
+    <div id="gallery"></div>
+    <div id="loading">Loading...</div>
+  </div>
+
+  <script src="js/exif.js"></script>
+  <script src="js/script.js"></script>
 </body>
+
 </html>
