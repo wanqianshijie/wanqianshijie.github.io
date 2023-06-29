@@ -1,24 +1,23 @@
 #gallery {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
-  align-items: flex-start;
 }
 
 .photo-container {
-  width: 25%;
+  flex-basis: 25%;
   padding: 10px;
   box-sizing: border-box;
-}
-
-.photo {
-  width: 100%;
-  height: auto;
-  display: block;
 }
 
 .photo-info {
   margin-top: 10px;
   font-size: 14px;
-  text-align: center;
+}
+
+.photo-info p {
+  margin: 0;
+}
+
+strong {
+  font-weight: bold;
 }
