@@ -20,6 +20,7 @@ h1 {
   max-width: 100%;
   height: auto;
   margin: 20px 0;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
 }
 
 .exif-info {
@@ -27,8 +28,18 @@ h1 {
   color: #fff;
   padding: 10px;
   text-align: center;
+  border-radius: 5px;
+  margin-top: 10px;
 }
 
 .exif-info p {
   margin: 5px 0;
+}
+
+.exif-info p:first-child {
+  margin-top: 0;
+}
+
+.exif-info p:last-child {
+  margin-bottom: 0;
 }
