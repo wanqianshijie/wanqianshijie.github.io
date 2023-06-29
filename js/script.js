@@ -13,45 +13,44 @@ function getPhotos() {
     .then(data => {
       loading.style.display = 'none';
 
-      // 随机排序照片
-      const shuffledData = shuffleArray(data);
-
-      shuffledData.forEach(photo => {
+      data.forEach(photo => {
         const photoInfo = document.createElement('div');
         photoInfo.className = 'photo-info';
 
         const img = new Image();
         img.src = photo.download_url;
         img.onload = function() {
-          const exifData = EXIF.getData(this);
+          EXIF.getData(img, function() {
+            const exifData = EXIF.getAllTags(this);
 
-          // 提取拍摄信息
-          const {
-            DateTimeOriginal,
-            GPSLatitude,
-            GPSLongitude,
-            ExposureTime,
-            FNumber,
-            ISOSpeedRatings,
-            Make,
-            Model
-          } = exifData;
+            // 提取拍摄信息
+            const {
+              DateTimeOriginal,
+              GPSLatitude,
+              GPSLongitude,
+              ExposureTime,
+              FNumber,
+              ISOSpeedRatings,
+              Make,
+              Model
+            } = exifData;
 
-          // 优化经度和纬度的显示格式
-          const latitude = formatCoordinates(GPSLatitude);
-          const longitude = formatCoordinates(GPSLongitude);
+            // 优化经度和纬度的显示格式
+            const latitude = formatCoordinates(GPSLatitude);
+            const longitude = formatCoordinates(GPSLongitude);
 
-          const photoDetails = `
-            <p>Shot on: ${formatDate(DateTimeOriginal)}</p>
-            <p>Latitude: ${latitude}</p>
-            <p>Longitude: ${longitude}</p>
-            <p>Exposure Time: ${ExposureTime}</p>
-            <p>Aperture: f/${FNumber}</p>
-            <p>ISO: ${ISOSpeedRatings}</p>
-            <p>Device: ${Make} ${Model}</p>
-          `;
+            const photoDetails = `
+              <p>Shot on: ${formatDate(DateTimeOriginal)}</p>
+              <p>Latitude: ${latitude}</p>
+              <p>Longitude: ${longitude}</p>
+              <p>Exposure Time: ${ExposureTime}</p>
+              <p>Aperture: f/${FNumber}</p>
+              <p>ISO: ${ISOSpeedRatings}</p>
+              <p>Device: ${Make} ${Model}</p>
+            `;
 
-          photoInfo.innerHTML = photoDetails;
+            photoInfo.innerHTML = photoDetails;
+          });
 
           const photoContainer = document.createElement('div');
           photoContainer.className = 'photo';
@@ -85,15 +84,6 @@ function formatDate(date) {
 
   const [year, month, day] = date.split(':');
   return `${day}-${month}-${year}`;
-}
-
-// 随机排序数组
-function shuffleArray(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-  return array;
 }
 
 // 监听滚动事件，加载更多照片
