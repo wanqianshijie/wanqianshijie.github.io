@@ -25,7 +25,7 @@ function loadPhotos() {
         photoContainer.appendChild(photo);
 
         // 获取照片的EXIF信息
-        getExifData(photoUrl)
+        getExifData(photo)
           .then(exifData => {
             // 创建显示EXIF信息的元素
             const exifInfo = document.createElement('div');
@@ -63,9 +63,9 @@ function getRandomPhotos(photos, count) {
 }
 
 // 使用exif.js获取照片的EXIF信息
-function getExifData(photoUrl) {
+function getExifData(photo) {
   return new Promise((resolve, reject) => {
-    EXIF.getData(photoUrl, function() {
+    EXIF.getData(photo, function() {
       const exifData = EXIF.pretty(this);
       resolve(exifData);
     });
