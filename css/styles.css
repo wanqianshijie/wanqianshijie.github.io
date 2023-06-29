@@ -1,11 +1,14 @@
 .photo-container {
   display: flex;
   flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: flex-start;
 }
 
 .photo-item {
-  width: calc(25% - 20px);
-  margin: 10px;
+  width: 25%;
+  padding: 10px;
+  box-sizing: border-box;
 }
 
 .photo-wrapper {
@@ -26,7 +29,7 @@
   padding: 10px;
   background-color: rgba(0, 0, 0, 0.8);
   color: #fff;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.4;
   opacity: 0;
   transition: opacity 0.3s ease;
