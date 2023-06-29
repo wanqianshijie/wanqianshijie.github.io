@@ -10,21 +10,24 @@
 
 <body>
   <div id="app">
-    <h1>Photo Showcase</h1>
-    <div class="photo-container">
-      <div v-for="photo in photos" :key="photo.id" class="photo-item">
-        <div class="photo-wrapper">
-          <img :src="photo.url" :alt="photo.name" @click="showExif(photo)" class="photo-image">
-          <div class="exif-info" v-if="photo.showExif">
-            <h2>EXIF Information</h2>
-            <p><strong>Shoot Time:</strong> {{ photo.exif.shootTime }}</p>
-            <p><strong>Device:</strong> {{ photo.exif.device }}</p>
-            <p><strong>Parameters:</strong> {{ photo.exif.parameters }}</p>
-          </div>
+  <div class="photo-container">
+    <div class="photo-item" v-for="photo in photos" :key="photo.id">
+      <div class="photo-wrapper">
+        <img :src="photo.url" class="photo-image" @click="showExif(photo)">
+        <div class="exif-info">
+          <h2>{{ photo.exif.date }}</h2>
+          <p>经度: {{ photo.exif.longitude }}</p>
+          <p>纬度: {{ photo.exif.latitude }}</p>
+          <p>曝光时间: {{ photo.exif.exposureTime }}</p>
+          <p>光圈大小: {{ photo.exif.aperture }}</p>
+          <p>ISO: {{ photo.exif.iso }}</p>
+          <p>设备信息: {{ photo.exif.device }}</p>
         </div>
       </div>
     </div>
   </div>
+</div>
+
 
   <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
