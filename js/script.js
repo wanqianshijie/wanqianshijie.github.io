@@ -31,7 +31,7 @@ $(document).ready(function() {
           var exifElement = $('<div class="exif"></div>');
 
           // Extract and format the required EXIF information
-          var dateTimeOriginal = exifData.DateTimeOriginal;
+          var dateTimeOriginal = exifData.DateTime;
           var exposureTime = exifData.ExposureTime;
           var apertureValue = exifData.ApertureValue;
           var isoSpeedRatings = exifData.ISOSpeedRatings;
