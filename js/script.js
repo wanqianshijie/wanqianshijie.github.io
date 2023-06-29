@@ -65,6 +65,7 @@ function getPhotos() {
     });
 }
 
+// 优化经度和纬度的显示格式
 function formatCoordinates(coordinates) {
   if (!coordinates) return '';
 
@@ -75,6 +76,7 @@ function formatCoordinates(coordinates) {
   return `${degrees}° ${minutes}' ${seconds}"`;
 }
 
+// 格式化日期显示
 function formatDate(date) {
   if (!date) return '';
 
