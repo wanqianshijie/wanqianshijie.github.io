@@ -8,7 +8,7 @@ new Vue({
   },
   methods: {
     fetchPhotos() {
-      const apiUrl = 'https://api.github.com/repos/lairdmax/lairdmax.github.io/contents/images';
+      const apiUrl = 'https://api.github.com/repos/wanqianshijie/photos/contents/img';
       // 使用实际的GitHub用户名和存储照片的仓库替换上述的"username/repo"
       fetch(apiUrl)
         .then(response => response.json())
