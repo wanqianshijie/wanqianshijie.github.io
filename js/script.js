@@ -38,7 +38,7 @@ fetch(`https://api.github.com/repos/${username}/${repository}/contents/${path}`)
         const longitude = convertCoordinate(GPSLongitude);
 
         // Format ExposureTime as a fraction
-        const exposureTime = formatFraction(ExposureTime);
+        const exposureTime = formatExposureTime(ExposureTime);
 
         // Format DateTimeOriginal
         const date = formatDate(DateTimeOriginal);
@@ -78,12 +78,12 @@ function convertCoordinate(coordinate) {
 }
 
 // Helper function to format ExposureTime as a fraction
-function formatFraction(value) {
+function formatExposureTime(value) {
   if (!value) return '';
 
   const numerator = value.numerator;
   const denominator = value.denominator;
-  return `1/${denominator/numerator}`;
+  return `1/${Math.round(denominator/numerator)}`;
 }
 
 // Helper function to format date
