@@ -19,7 +19,7 @@ $(document).ready(function() {
       url: apiUrl,
       method: 'GET',
       data: { page: page, per_page: perPage },
-      headers: { 'Authorization': 'token 您的GitHub访问令牌' },
+      headers: { 'Authorization': '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' },
       success: function(response) {
         for(var i = 0; i < response.length; i++) {
           var photoData = response[i];
