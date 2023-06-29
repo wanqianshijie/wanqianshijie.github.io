@@ -3,23 +3,11 @@ window.onload = function() {
         .then(response => response.json())
         .then(data => {
             let gallery = document.querySelector('.gallery');
-            let row = document.createElement('div');
-            row.className = 'row';
 
             for (let i = 0; i < data.length; i++) {
                 let photoUrl = data[i].download_url;
                 let photoElement = createPhotoElement(photoUrl);
-                row.appendChild(photoElement);
-
-                if ((i + 1) % 3 === 0) {
-                    gallery.appendChild(row);
-                    row = document.createElement('div');
-                    row.className = 'row';
-                }
-            }
-
-            if (row.hasChildNodes()) {
-                gallery.appendChild(row);
+                gallery.appendChild(photoElement);
             }
         })
         .catch(error => {
@@ -50,8 +38,8 @@ function getImageInfo(photoUrl, infoElement) {
         EXIF.getData(img, function() {
             let photoInfo = {
                 DateTimeOriginal: EXIF.getTag(this, 'DateTimeOriginal'),
-                GPSLatitude: getFormattedCoordinates(EXIF.getTag(this, 'GPSLatitude')),
-                GPSLongitude: getFormattedCoordinates(EXIF.getTag(this, 'GPSLongitude')),
+                GPSLatitude: getFormattedCoordinate(EXIF.getTag(this, 'GPSLatitude')),
+                GPSLongitude: getFormattedCoordinate(EXIF.getTag(this, 'GPSLongitude')),
                 ExposureTime: EXIF.getTag(this, 'ExposureTime'),
                 FNumber: EXIF.getTag(this, 'FNumber'),
                 ISOSpeedRatings: EXIF.getTag(this, 'ISOSpeedRatings'),
@@ -65,15 +53,15 @@ function getImageInfo(photoUrl, infoElement) {
     img.src = photoUrl;
 }
 
-function getFormattedCoordinates(coordinates) {
-    if (coordinates && coordinates.length === 3) {
-        let degrees = coordinates[0].numerator;
-        let minutes = coordinates[1].numerator;
-        let seconds = coordinates[2].numerator / coordinates[2].denominator;
+function getFormattedCoordinate(coordinate) {
+    if (coordinate && coordinate.length === 3) {
+        let degrees = coordinate[0].numerator;
+        let minutes = coordinate[1].numerator;
+        let seconds = coordinate[2].numerator / coordinate[2].denominator;
 
-        let direction = coordinates[0].denominator === 1 ? coordinates[0].value : '';
-        let formattedCoordinates = degrees + '° ' + minutes + '\' ' + seconds + '" ' + direction;
-        return formattedCoordinates;
+        let direction = coordinate[0].denominator === 1 ? coordinate[0].value : '';
+        let formattedCoordinate = degrees + '° ' + minutes + '\' ' + seconds + '" ' + direction;
+        return formattedCoordinate;
     }
 
     return '';
