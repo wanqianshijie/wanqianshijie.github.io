@@ -34,13 +34,12 @@ function loadPhotos() {
             // 解析EXIF信息并添加到页面
             const parsedExif = parseExifData(exifData);
             exifInfo.innerHTML = `
-              <p>Date: ${parsedExif.date}</p>
-              <p>Latitude: ${parsedExif.latitude}</p>
-              <p>Longitude: ${parsedExif.longitude}</p>
-              <p>Exposure Time: ${parsedExif.exposureTime}</p>
-              <p>Aperture: ${parsedExif.aperture}</p>
-              <p>ISO: ${parsedExif.iso}</p>
-              <p>Device: ${parsedExif.device}</p>
+              <p><strong>Date:</strong> ${parsedExif.date}</p>
+              <p><strong>Location:</strong> ${parsedExif.location}</p>
+              <p><strong>Exposure Time:</strong> ${parsedExif.exposureTime}</p>
+              <p><strong>Aperture:</strong> ${parsedExif.aperture}</p>
+              <p><strong>ISO:</strong> ${parsedExif.iso}</p>
+              <p><strong>Device:</strong> ${parsedExif.device}</p>
             `;
 
             photoContainer.appendChild(exifInfo);
@@ -88,8 +87,7 @@ function parseExifData(exifData) {
   if (exif.GPSLatitude && exif.GPSLongitude) {
     const latitude = convertCoordinates(exif.GPSLatitude, exif.GPSLatitudeRef);
     const longitude = convertCoordinates(exif.GPSLongitude, exif.GPSLongitudeRef);
-    exif.latitude = latitude;
-    exif.longitude = longitude;
+    exif.location = `Latitude: ${latitude}, Longitude: ${longitude}`;
   }
 
   // 优化日期格式
