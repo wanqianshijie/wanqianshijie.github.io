@@ -1,111 +1,126 @@
-$(document).ready(function() {
-  var page = 1;
-  var perPage = 4;
-  var galleryContainer = $('#gallery');
-  
-  loadPhotos();
+// 获取照片信息并展示
+function loadPhotos() {
+  const gallery = document.getElementById('gallery');
+  const apiUrl = 'https://api.github.com/repos/wanqianshijie/photos/contents/img';
 
-  $(window).scroll(function() {
-    if ($(window).scrollTop() + $(window).height() == $(document).height()) {
-      page++;
-      loadPhotos();
-    }
-  });
+  // 使用GitHub API获取照片列表
+  fetch(apiUrl)
+    .then(response => response.json())
+    .then(data => {
+      const photoUrls = data.map(photo => photo.download_url);
+      const photosCount = photoUrls.length;
 
-  function loadPhotos() {
-    var apiUrl = 'https://api.github.com/repos/wanqianshijie/photos/contents/img?page=' + page + '&per_page=' + perPage;
+      // 随机获取4张照片
+      const randomPhotos = getRandomPhotos(photoUrls, 4);
 
-    $.getJSON(apiUrl, function(data) {
-      $.each(data, function(index, photo) {
-        var imageUrl = photo.download_url;
+      randomPhotos.forEach(photoUrl => {
+        // 创建照片容器
+        const photoContainer = document.createElement('div');
+        photoContainer.classList.add('photo-container');
 
-        $('<img/>').attr('src', imageUrl).on('load', function() {
-          var img = this;
-          var exifData = getExifData(img);
-          var exifInfo = formatExifInfo(exifData);
+        // 创建照片元素
+        const photo = document.createElement('img');
+        photo.src = photoUrl;
+        photo.classList.add('photo');
+        photoContainer.appendChild(photo);
 
-          var photoContainer = $('<div class="photo-container"></div>');
-          var photoInfo = $('<div class="photo-info"></div>').html(exifInfo);
+        // 获取照片的EXIF信息
+        getExifData(photoUrl)
+          .then(exifData => {
+            // 创建显示EXIF信息的元素
+            const exifInfo = document.createElement('div');
+            exifInfo.classList.add('exif-info');
 
-          photoContainer.append(img);
-          photoContainer.append(photoInfo);
-          galleryContainer.append(photoContainer);
-        });
+            // 解析EXIF信息并添加到页面
+            const parsedExif = parseExifData(exifData);
+            exifInfo.innerHTML = `
+              <p>Date: ${parsedExif.date}</p>
+              <p>Latitude: ${parsedExif.latitude}</p>
+              <p>Longitude: ${parsedExif.longitude}</p>
+              <p>Exposure Time: ${parsedExif.exposureTime}</p>
+              <p>Aperture: ${parsedExif.aperture}</p>
+              <p>ISO: ${parsedExif.iso}</p>
+              <p>Device: ${parsedExif.device}</p>
+            `;
+
+            photoContainer.appendChild(exifInfo);
+          });
+
+        gallery.appendChild(photoContainer);
       });
     });
+}
+
+// 获取随机照片
+function getRandomPhotos(photos, count) {
+  const randomPhotos = [];
+  const shuffledPhotos = photos.sort(() => 0.5 - Math.random());
+
+  for (let i = 0; i < count; i++) {
+    randomPhotos.push(shuffledPhotos[i]);
   }
 
-  function getExifData(img) {
-    var exifData = null;
+  return randomPhotos;
+}
 
-    EXIF.getData(img, function() {
-      exifData = EXIF.getAllTags(this);
+// 使用exif.js获取照片的EXIF信息
+function getExifData(photoUrl) {
+  return new Promise((resolve, reject) => {
+    EXIF.getData(photoUrl, function() {
+      const exifData = EXIF.pretty(this);
+      resolve(exifData);
     });
+  });
+}
 
-    return exifData;
+// 解析EXIF信息
+function parseExifData(exifData) {
+  const exif = {};
+
+  exifData.split('\n').forEach(item => {
+    const keyValue = item.split(':');
+    const key = keyValue[0].trim();
+    const value = keyValue[1].trim();
+    exif[key] = value;
+  });
+
+  // 优化经度和纬度坐标
+  if (exif.GPSLatitude && exif.GPSLongitude) {
+    const latitude = convertCoordinates(exif.GPSLatitude, exif.GPSLatitudeRef);
+    const longitude = convertCoordinates(exif.GPSLongitude, exif.GPSLongitudeRef);
+    exif.latitude = latitude;
+    exif.longitude = longitude;
   }
 
-  function formatExifInfo(exifData) {
-    var formattedInfo = '';
-    var dateTime = exifData.DateTimeOriginal;
-    var latitude = exifData.GPSLatitude;
-    var longitude = exifData.GPSLongitude;
-    var exposureTime = exifData.ExposureTime;
-    var aperture = exifData.FNumber;
-    var iso = exifData.ISO;
-    var make = exifData.Make;
-    var model = exifData.Model;
-
-    if (dateTime) {
-      var date = dateTime.split(' ')[0];
-      var time = dateTime.split(' ')[1];
-      var formattedDate = formatDate(date);
-      formattedInfo += '<p><strong>Date:</strong> ' + formattedDate + '</p>';
-      formattedInfo += '<p><strong>Time:</strong> ' + time + '</p>';
-    }
-
-    if (latitude && longitude) {
-      var formattedLat = convertDMSToDD(latitude);
-      var formattedLng = convertDMSToDD(longitude);
-      formattedInfo += '<p><strong>Latitude:</strong> ' + formattedLat + '</p>';
-      formattedInfo += '<p><strong>Longitude:</strong> ' + formattedLng + '</p>';
-    }
-
-    if (exposureTime) {
-      formattedInfo += '<p><strong>Exposure Time:</strong> ' + exposureTime + '</p>';
-    }
-
-    if (aperture) {
-      formattedInfo += '<p><strong>Aperture:</strong> ' + aperture + '</p>';
-    }
-
-    if (iso) {
-      formattedInfo += '<p><strong>ISO:</strong> ' + iso + '</p>';
-    }
-
-    if (make && model) {
-      formattedInfo += '<p><strong>Device:</strong> ' + make + ' ' + model + '</p>';
-    }
-
-    return formattedInfo;
+  // 优化日期格式
+  if (exif.DateTimeOriginal) {
+    const date = formatDate(exif.DateTimeOriginal);
+    exif.date = date;
   }
 
-  function formatDate(date) {
-    var parts = date.split(':');
-    var year = parts[0];
-    var month = parts[1];
-    var day = parts[2];
+  return exif;
+}
 
-    return day + '/' + month + '/' + year;
+// 转换经度和纬度坐标
+function convertCoordinates(coordinates, direction) {
+  const degrees = coordinates[0];
+  const minutes = coordinates[1];
+  const seconds = coordinates[2];
+  let decimal = degrees + minutes / 60 + seconds / 3600;
+
+  if (direction === 'S' || direction === 'W') {
+    decimal = -decimal;
   }
 
-  function convertDMSToDD(coordinate) {
-    var degrees = coordinate[0];
-    var minutes = coordinate[1];
-    var seconds = coordinate[2];
+  return decimal.toFixed(6);
+}
 
-    var dd = degrees + minutes / 60 + seconds / 3600;
+// 格式化日期
+function formatDate(dateString) {
+  const date = new Date(dateString);
+  const options = { year: 'numeric', month: 'long', day: 'numeric' };
+  return date.toLocaleDateString('en-US', options);
+}
 
-    return dd;
-  }
-});
+// 页面加载时加载照片
+window.addEventListener('DOMContentLoaded', loadPhotos);
