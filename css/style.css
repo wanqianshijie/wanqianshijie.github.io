@@ -1,37 +1,41 @@
 body {
-    margin: 0;
-    padding: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f2f2f2;
+  margin: 0;
+  padding: 0;
 }
 
-.gallery {
-    padding: 20px;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
+#gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  padding: 20px;
 }
 
 .photo-container {
-    width: 25%;
-    padding: 10px;
-    box-sizing: border-box;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 }
 
 .photo {
-    width: 100%;
-    height: auto;
-    display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
 }
 
 .exif-info {
-    background-color: rgba(0, 0, 0, 0.5);
-    color: #fff;
-    padding: 10px;
-    font-family: Arial, sans-serif;
-    font-size: 12px;
+  padding: 10px;
 }
 
 .exif-info p {
-    margin: 5px 0;
+  margin: 0;
+  line-height: 1.5;
 }
 
-/* Add more CSS styles to enhance the page appearance */
+.exif-info p:first-child {
+  font-weight: bold;
+}
+
+/* 添加更多样式以美化页面 */
