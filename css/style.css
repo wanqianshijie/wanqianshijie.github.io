@@ -1,0 +1,28 @@
+.gallery {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.photo {
+    width: 30%;
+    margin: 10px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+}
+
+.photo img {
+    width: 100%;
+    height: auto;
+}
+
+.photo .info {
+    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.photo .info p {
+    margin: 5px 0;
+}
