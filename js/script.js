@@ -37,6 +37,9 @@ fetch(`https://api.github.com/repos/${username}/${repository}/contents/${path}`)
         const latitude = convertCoordinate(GPSLatitude);
         const longitude = convertCoordinate(GPSLongitude);
 
+        // Format ExposureTime as a fraction
+        const exposureTime = formatFraction(ExposureTime);
+
         // Format DateTimeOriginal
         const date = formatDate(DateTimeOriginal);
 
@@ -45,7 +48,7 @@ fetch(`https://api.github.com/repos/${username}/${repository}/contents/${path}`)
           <p>Date: ${date}</p>
           <p>Latitude: ${latitude}</p>
           <p>Longitude: ${longitude}</p>
-          <p>Exposure Time: ${ExposureTime}</p>
+          <p>Exposure Time: ${exposureTime}</p>
           <p>Aperture: ${FNumber}</p>
           <p>ISO: ${ISOSpeedRatings}</p>
           <p>Camera: ${Make} ${Model}</p>
@@ -64,14 +67,22 @@ fetch(`https://api.github.com/repos/${username}/${repository}/contents/${path}`)
 function convertCoordinate(coordinate) {
   if (!coordinate) return '';
 
-  const degrees = coordinate[0].numerator;
-  const minutes = coordinate[1].numerator;
+  const degrees = coordinate[0].numerator / coordinate[0].denominator;
+  const minutes = coordinate[1].numerator / coordinate[1].denominator;
   const seconds = coordinate[2].numerator / coordinate[2].denominator;
 
   const decimalDegrees = degrees + (minutes / 60) + (seconds / 3600);
   const direction = coordinate[0].value === 0 ? 'S' : 'N';
 
   return `${decimalDegrees.toFixed(6)}° ${direction}`;
+}
+
+// Helper function to format ExposureTime as a fraction
+function formatFraction(value) {
+  if (!value) return '';
+
+  const numerator = value.numerator / value.denominator;
+  return `${numerator.toFixed(3)}s`;
 }
 
 // Helper function to format date
