@@ -1,104 +1,121 @@
-$(document).ready(function() {
-  var page = 1;
-  var perPage = 4;
-  var gallery = $('#gallery');
+// GitHub API URL for retrieving photos
+const apiUrl = 'https://api.github.com/repos/wanqianshijie/photos/contents/img';
 
-  loadPhotos();
+// Number of photos to load initially and on scroll
+const photosPerPage = 4;
 
-  $(window).scroll(function() {
-    if($(window).scrollTop() + $(window).height() == $(document).height()) {
-      loadPhotos();
+// Load photos from GitHub API
+async function loadPhotos() {
+    try {
+        const response = await fetch(apiUrl);
+        const photos = await response.json();
+
+        // Randomly select photosPerPage number of photos
+        const randomPhotos = getRandomElements(photos, photosPerPage);
+
+        // Display photos on the page
+        randomPhotos.forEach(photo => displayPhoto(photo));
+    } catch (error) {
+        console.error('Error loading photos:', error);
     }
-  });
+}
 
-  function loadPhotos() {
-    var apiUrl = 'https://api.github.com/repos/{username}/{repository}/contents/{path}';
-    var username = 'wanqianshijie';
-    var repository = 'photos';
-    var path = 'img';
+// Display a single photo on the page
+function displayPhoto(photo) {
+    const gallery = document.getElementById('gallery');
 
-    $.ajax({
-      url: apiUrl.replace('{username}', username).replace('{repository}', repository).replace('{path}', path),
-      dataType: 'json',
-      success: function(data) {
-        var start = (page - 1) * perPage;
-        var end = start + perPage;
+    // Create photo container
+    const photoContainer = document.createElement('div');
+    photoContainer.classList.add('photo-container');
 
-        for (var i = start; i < end; i++) {
-          if (i >= data.length) {
-            break;
-          }
+    // Create image element
+    const image = document.createElement('img');
+    image.src = photo.download_url;
+    image.alt = photo.name;
+    image.classList.add('photo');
 
-          var photo = data[i];
-          var photoUrl = photo.download_url;
-          var photoInfo = getPhotoInfo(photoUrl);
+    // Create photo info element
+    const info = document.createElement('div');
+    info.classList.add('info');
 
-          var photoElement = $('<div class="photo">');
-          var imgElement = $('<img>').attr('src', photoUrl);
-          var infoElement = $('<div class="photo-info">').html(photoInfo);
+    // Fetch EXIF data using exif.js
+    EXIF.getData(image, function () {
+        const exifData = EXIF.getAllTags(this);
 
-          photoElement.append(imgElement);
-          photoElement.append(infoElement);
-          gallery.append(photoElement);
-        }
+        // Extract relevant information
+        const {
+            DateTimeOriginal,
+            GPSLatitude,
+            GPSLongitude,
+            ExposureTime,
+            FNumber,
+            ISOSpeedRatings,
+            Model
+        } = exifData;
 
-        page++;
-      }
-    });
-  }
+        // Format date
+        const formattedDate = formatDateTime(DateTimeOriginal);
 
-  function getPhotoInfo(photoUrl) {
-    var photoInfo = '';
+        // Create info HTML
+        const infoHTML = `
+            <p>Date: ${formattedDate}</p>
+            <p>Latitude: ${formatCoordinates(GPSLatitude)}</p>
+            <p>Longitude: ${formatCoordinates(GPSLongitude)}</p>
+            <p>Exposure Time: ${ExposureTime}</p>
+            <p>Aperture: ${FNumber}</p>
+            <p>ISO: ${ISOSpeedRatings}</p>
+            <p>Device: ${Model}</p>
+        `;
 
-    EXIF.getData(photoUrl, function() {
-      var exifData = EXIF.getAllTags(this);
-
-      var date = exifData.DateTimeOriginal;
-      var latitude = exifData.GPSLatitude;
-      var longitude = exifData.GPSLongitude;
-      var exposureTime = exifData.ExposureTime;
-      var aperture = exifData.FNumber;
-      var iso = exifData.ISOSpeedRatings;
-      var make = exifData.Make;
-      var model = exifData.Model;
-
-      // Format the date
-      var formattedDate = formatDate(date);
-
-      // Convert latitude and longitude to readable format
-      var formattedLatitude = convertCoordinate(latitude);
-      var formattedLongitude = convertCoordinate(longitude);
-
-      photoInfo = 'Date: ' + formattedDate + '<br>';
-      photoInfo += 'Latitude: ' + formattedLatitude + '<br>';
-      photoInfo += 'Longitude: ' + formattedLongitude + '<br>';
-      photoInfo += 'Exposure Time: ' + exposureTime + '<br>';
-      photoInfo += 'Aperture: ' + aperture + '<br>';
-      photoInfo += 'ISO: ' + iso + '<br>';
-      photoInfo += 'Device: ' + make + ' ' + model;
+        // Insert info HTML into info element
+        info.innerHTML = infoHTML;
     });
 
-    return photoInfo;
-  }
+    // Append image and info to photo container
+    photoContainer.appendChild(image);
+    photoContainer.appendChild(info);
 
-  function formatDate(date) {
-    var parts = date.split(' ');
-    var datePart = parts[0].split(':').reverse().join('-');
-    var timePart = parts[1];
-    return datePart + ' ' + timePart;
-  }
+    // Append photo container to the gallery
+    gallery.appendChild(photoContainer);
+}
 
-  function convertCoordinate(coord) {
-    var degrees = coord[0];
-    var minutes = coord[1];
-    var seconds = coord[2];
-    var direction = coord[3];
+// Helper function to format date and time
+function formatDateTime(dateTime) {
+    const date = new Date(dateTime);
+    const formattedDate = date.toLocaleString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric'
+    });
+    return formattedDate;
+}
 
-    var decimal = degrees + (minutes / 60) + (seconds / 3600);
-    if (direction === 'S' || direction === 'W') {
-      decimal = -decimal;
+// Helper function to format coordinates
+function formatCoordinates(coordinates) {
+    const degrees = coordinates[0].numerator / coordinates[0].denominator;
+    const minutes = coordinates[1].numerator / coordinates[1].denominator;
+    const seconds = coordinates[2].numerator / coordinates[2].denominator;
+    const direction = coordinates[3];
+
+    const formattedCoordinates = `${degrees}° ${minutes}' ${seconds}" ${direction}`;
+    return formattedCoordinates;
+}
+
+// Helper function to get a random subset of elements from an array
+function getRandomElements(array, numElements) {
+    const shuffled = array.sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, numElements);
+}
+
+// Load initial set of photos
+loadPhotos();
+
+// Load more photos on scroll
+window.addEventListener('scroll', function () {
+    if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
+        loadPhotos();
     }
-
-    return decimal.toFixed(6);
-  }
 });
