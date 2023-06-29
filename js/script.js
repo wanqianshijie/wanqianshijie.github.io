@@ -1,3 +1,4 @@
+
 window.onload = function() {
   // 使用GitHub API获取照片列表
   fetch('https://api.github.com/repos/wanqianshijie/photos/contents/img')
