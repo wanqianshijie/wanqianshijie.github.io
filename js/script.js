@@ -13,7 +13,10 @@ function getPhotos() {
     .then(data => {
       loading.style.display = 'none';
 
-      data.forEach(photo => {
+      // 随机排序照片
+      const shuffledData = shuffleArray(data);
+
+      shuffledData.forEach(photo => {
         const photoInfo = document.createElement('div');
         photoInfo.className = 'photo-info';
 
@@ -82,6 +85,15 @@ function formatDate(date) {
 
   const [year, month, day] = date.split(':');
   return `${day}-${month}-${year}`;
+}
+
+// 随机排序数组
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
 }
 
 // 监听滚动事件，加载更多照片
