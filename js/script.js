@@ -26,11 +26,11 @@ function displayPhoto(photoUrl) {
 
     // 创建照片容器
     var photoContainer = document.createElement('div');
-    photoContainer.classList.add('photo-container');
+    photoContainer.classList.add('photo-item');
 
     // 创建照片描述
     var descriptionElement = document.createElement('div');
-    descriptionElement.classList.add('photo-description');
+    descriptionElement.classList.add('exif-info');
     descriptionElement.innerHTML = exifInfo;
 
     // 将照片和描述添加到页面中
@@ -64,13 +64,14 @@ function getFormattedExifInfo(exifData) {
   exposureTime = formatExposureTime(exposureTime);
 
   // 构建EXIF信息字符串
-  var exifInfo = "<b>拍摄时间：</b>" + dateTimeOriginal + "<br>";
-  exifInfo += "<b>经度坐标：</b>" + longitude + "<br>";
-  exifInfo += "<b>纬度坐标：</b>" + latitude + "<br>";
-  exifInfo += "<b>曝光时间：</b>" + exposureTime + " 秒<br>";
-  exifInfo += "<b>光圈大小：</b>" + apertureValue + "<br>";
-  exifInfo += "<b>ISO：</b>" + isoSpeedRatings + "<br>";
-  exifInfo += "<b>设备信息：</b>" + make + " " + model;
+  var exifInfo = "<h2>EXIF信息</h2>";
+  exifInfo += "<p><b>拍摄时间：</b>" + dateTimeOriginal + "</p>";
+  exifInfo += "<p><b>经度坐标：</b>" + longitude + "</p>";
+  exifInfo += "<p><b>纬度坐标：</b>" + latitude + "</p>";
+  exifInfo += "<p><b>曝光时间：</b>" + exposureTime + " 秒</p>";
+  exifInfo += "<p><b>光圈大小：</b>" + apertureValue + "</p>";
+  exifInfo += "<p><b>ISO：</b>" + isoSpeedRatings + "</p>";
+  exifInfo += "<p><b>设备信息：</b>" + make + " " + model + "</p>";
 
   return exifInfo;
 }
@@ -82,7 +83,7 @@ function optimizeCoordinate(coordinate, coordinateRef) {
   var seconds = coordinate[2].numerator / coordinate[2].denominator / 3600;
   var direction = coordinateRef === 'N' || coordinateRef === 'E' ? 1 : -1;
   var decimalCoordinate = (degrees + minutes + seconds) * direction;
-  
+
   return decimalCoordinate.toFixed(6);
 }
 
@@ -91,7 +92,7 @@ function formatDateTimeOriginal(dateTimeOriginal) {
   var date = new Date(dateTimeOriginal.getTime());
   var formattedDate = date.getFullYear() + '-' + (date.getMonth() + 1).toString().padStart(2, '0') + '-' + date.getDate().toString().padStart(2, '0');
   var formattedTime = date.getHours().toString().padStart(2, '0') + ':' + date.getMinutes().toString().padStart(2, '0') + ':' + date.getSeconds().toString().padStart(2, '0');
-  
+
   return formattedDate + ' ' + formattedTime;
 }
 
@@ -104,6 +105,6 @@ function formatExposureTime(exposureTime) {
     numerator = Math.round(numerator / denominator);
     denominator = 1;
   }
-  
+
   return numerator + '/' + denominator;
 }
