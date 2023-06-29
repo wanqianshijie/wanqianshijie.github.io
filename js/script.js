@@ -81,8 +81,9 @@ function convertCoordinate(coordinate) {
 function formatFraction(value) {
   if (!value) return '';
 
-  const numerator = value.numerator / value.denominator;
-  return `${numerator.toFixed(3)}s`;
+  const numerator = value.numerator;
+  const denominator = value.denominator;
+  return `1/${denominator/numerator}`;
 }
 
 // Helper function to format date
