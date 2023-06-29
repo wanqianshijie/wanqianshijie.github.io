@@ -20,14 +20,20 @@
 
 .exif-info {
   position: absolute;
-  bottom: 10px;
+  bottom: 0;
   left: 0;
   width: 100%;
+  padding: 10px;
   background-color: rgba(0, 0, 0, 0.8);
   color: #fff;
-  padding: 10px;
   font-size: 12px;
   line-height: 1.4;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.photo-item:hover .exif-info {
+  opacity: 1;
 }
 
 .exif-info h2 {
