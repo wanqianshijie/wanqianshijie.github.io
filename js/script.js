@@ -44,7 +44,7 @@ $(document).ready(function() {
           var formattedExposureTime = formatExposureTime(exposureTime);
           
           // Create HTML content for the exif element
-          var exifContent = '<p>拍摄时间：' + dateTime + '</p>' +
+          var exifContent = '<p>拍摄时间：' + formattedDateTime + '</p>' +
                             '<p>经度坐标：' + formatCoordinate(gpsLongitude) + '</p>' +
                             '<p>纬度坐标：' + formatCoordinate(gpsLatitude) + '</p>' +
                             '<p>曝光时间：' + formattedExposureTime + ' 秒</p>' +
